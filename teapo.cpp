@@ -89,11 +89,11 @@ GLvoid window_display()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
+    glEnable(GL_COLOR_MATERIAL_FACE);
+   // glDisable(GL_DITHER);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-25.0f, 25.0f, -25.0f, 25.0f, -25.0f, 25.0f);
-
     glTranslatef(x,0.0,0.0);
     //glColor3f(0.0f,0.0f,20.0f);
     glutSolidSphere(1.5d,100,100);
@@ -104,13 +104,13 @@ GLvoid window_display()
         glutSolidCube(2.0f);
     glPopMatrix();
 
-    glRotatef(a,0.0,0.0,1.0);
-    glTranslatef(13.0,0.0,0.0);
-
+    //glRotatef(a,0.0,0.0,1.0);
+    glTranslatef(13.0*cos(a),13.0*sin(a),0.0);
+    //glTranslatef(13.0,0.0,0.0);
 	/*dibujar aqui*/
     glutSolidTeapot(4.0);
     glPushMatrix();
-        glRotatef(a,0.0,1.0,0.0);
+        glRotatef(a2,0.0,1.0,0.0);
         glTranslatef(5.0,5.0,0.0);
 
         glutSolidTorus(0.5f,0.8f,100,100);
@@ -119,8 +119,8 @@ GLvoid window_display()
     time = glutGet(GLUT_ELAPSED_TIME); /// recupera el tiempo ,que paso desde el incio de programa
     float dt = float(time -timebase)/1000.0;// delta time
     timebase = time;
-    a+= (18) * dt;
-    a2=a*3;
+    a+= (2) * dt;
+    a2=a*30;
     a3+=0.25;
     if(x<-8.0 || x>8.0)
         variant*=-1;
