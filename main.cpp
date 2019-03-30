@@ -1,174 +1,223 @@
 #define GLUT_DISABLE_ATEXIT_HACK
 #include <windows.h>
 #include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <iostream>
+
 #include <GL/glut.h>
+using namespace std;
+#define KEY_A 97
+#define KEY_Q 113
+#define KEY_S 115
+#define KEY_W 119
+#define KEY_D 100
+#define KEY_E 101
 
-#define KEY_ESC 27
+#define RED 0
+#define GREEN 0
+#define BLUE 0
+#define ALPHA 1
 
-//dibuja un simple gizmo
-void displayGizmo()
+#define ECHAP 27
+void init_scene();
+void render_scene();
+GLvoid initGL();
+GLvoid window_display();
+GLvoid window_reshape(GLsizei width, GLsizei height);
+GLvoid window_key(unsigned char key, int x, int y);
+
+//function called on each frame
+GLvoid window_idle();
+
+int main(int argc, char **argv)
 {
-	glBegin(GL_LINES);
-	glColor3d(255,0,0);
-	glVertex2d(0, 0);
-	glVertex2d(10, 0);
-	glColor3d(0, 255, 0);
-	glVertex2d(0, 0);
-	glVertex2d(0, 10);
-	glEnd();
+	glutInit(&argc, argv);
+
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+
+
+	glutInitWindowSize(600, 600);
+	glutInitWindowPosition(0, 0);
+	glutCreateWindow("TP 2 : Transformaciones");
+
+
+	initGL();
+	init_scene();
+
+	glutDisplayFunc(&window_display);
+
+	glutReshapeFunc(&window_reshape);
+
+	glutKeyboardFunc(&window_key);
+
+	//function called on each frame
+	glutIdleFunc(&window_idle);
+
+	glutMainLoop();
+
+	return 1;
 }
-void drawSquad(int x, int y, int a){
-    a = a/2;
-    glBegin(GL_LINE_LOOP);
-        glColor3b(255,0,0);
-        glVertex2d(x+a, y+a);
-        glVertex2d(x+a, y-a);
-        glColor3b(255,0,0);
-        glVertex2d(x+a, y-a);
-        glVertex2d(x-a, y-a);
-        glColor3b(255,0,0);
-        glVertex2d(x-a, y-a);
-        glVertex2d(x-a, y+a);
+
+
+
+GLvoid initGL()
+{
+	GLfloat position[] = { 0.0f, 5.0f, 10.0f, 0.0 };
+
+	//enable light : try without it
+	glLightfv(GL_LIGHT0, GL_POSITION, position);
+	glEnable(GL_LIGHTING);
+	//light 0 "on": try without it
+	glEnable(GL_LIGHT0);
+
+	//shading model : try GL_FLAT
+	glShadeModel(GL_SMOOTH);
+
+	glEnable(GL_DEPTH_TEST);
+
+	//enable material : try without it
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
+
+	glClearColor(RED, GREEN, BLUE, ALPHA);
+}
+
+void parte(float ancho, float largo, float a, float b, float c){
+    glColor3b(a,b,c);
+    glBegin(GL_QUADS);
+        glVertex2f(0,-largo/2.0f);
+        glVertex2f(ancho,-largo/2.0f);
+        glVertex2f(ancho,largo/2.0f);
+        glVertex2f(0,largo/2.0f);
     glEnd();
 }
-/**
- public void circleSimple(int xCenter, int yCenter, int radius, Color c)
-    {
-        int pix = c.getRGB();
-        int x, y, r2;
-
-        r2 = radius * radius;
-        for (x = -radius; x <= radius; x++) {
-            y = (int) (Math.sqrt(r2 - x*x) + 0.5);
-            raster.setPixel(pix, xCenter + x, yCenter + y);
-            raster.setPixel(pix, xCenter + x, yCenter - y);
-        }
-    }
-const  double  pi2 = 6.28318530718;
-void drawRectangle(int &x, int &y){
-    static double radius = 50;
-    const double delta_theta = pi2/25;
-    double xcenter = x , ycenter = y;
-    double xx, yy;
-    double theta = 0.0;
-    glColor3f(0.255f,0.204f,0.255f);
+void cuerda( float largo, float r, float g, float b){
+    glLineWidth(2.0);
+    glColor3f(r,g,b);
     glBegin(GL_LINES);
-        double auX=xcenter + radius * sin(theta);
-        double auY=ycenter + radius * cos(theta);
-        while (theta <= pi2) {
-            theta += delta_theta;
-            xx = xcenter + radius * sin(theta);
-            yy = ycenter + radius * cos(theta);
-            glVertex2f(auX, auY);
-            glVertex2f(xx, yy);
-            auX=xx;
-            auY=yy;
-        }
+        glVertex2d(0,0);
+        glVertex2d(0,-largo);
+    glEnd();
+    glBegin(GL_QUADS);
+        glVertex2f(-2.5f,-largo-5.0);
+        glVertex2f(-2.5f,-largo);
+        glVertex2f(2.5f,-largo);
+        glVertex2f(2.5f,-largo-5.0);
     glEnd();
 }
 
-**/
-void drawCircle(float cx, float cy, float r){
-   double  pi2 = 6.28318530718;
-   double delta_theta = pi2/25 , theta=0.0;
-   double xx,yy;
-   glColor3f(0.255f,0.204f,0.255f);
-   glBegin(GL_LINES);
-        double auX=cx + r * sin(theta);
-        double auY=cy + r * cos(theta);
-        while (theta <= pi2) {
-            theta += delta_theta;
-            xx = cx + r * sin(theta);
-            yy = cy + r * cos(theta);
-            glVertex2d(auX, auY);
-            glVertex2d(xx, yy);
-            auX=xx;
-            auY=yy;
-        }
-    glEnd();
+float x1=0.0,x2=0.0,x3=0.0,c1=0.0;
+float variant=0.03;
 
-}
-void draw1(int c, float p){
-    p = 100.0 / p;
-    float r=40,x=0.0,y=0.0;
+int time=0;
+int timebase=0;
+int lar=50;
+GLvoid window_display()
+{
 
-    for(int i=0;i<c;i++){
-        drawCircle(x,y,r);
-        r= r-(r/p);
-        x=-40.0 + r;
-    }
-}
-//
-//funcion llamada a cada imagen
-void glPaint(void) {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//El fondo de la escena al color initial
-	glClearColor(255.0f, 255.0f, 255.0f, 0.0f); //(R, G, B, transparencia) en este caso un fondo negro
+    glEnable(GL_COLOR_MATERIAL);
+	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-
-
-	//dibuja el gizmo
-	//displayGizmo();
-    ///drawSquad(0,0,50);
-    ///draw1(10,8);
-    draw2();
-	//doble buffer, mantener esta instruccion al fin de la funcion
+	glOrtho(-100.0f, 100.0f, -100.0f, 100.0f, -2.0f, 2.0f);
+    glBegin(GL_QUADS);
+        glColor3f(255.0f,255.0f,255.0f);
+        glVertex2f(-20/2.0f,-12/2.0f);
+        glVertex2f(20/2.0f,-12/2.0f);
+        glVertex2f(20/2.0f,12/2.0f);
+        glVertex2f(-20/2.0f,12/2.0f);
+    glEnd();
+    glPushMatrix();
+        glRotated(x1,0.0,0.0,1.0);
+        parte(30,10,200.0f,100.0f,150.0f);
+        glPushMatrix();
+            glTranslated(30.0,0.0,0.0);
+            glRotated(x2,0.0,0.0,1.0);
+            parte(25,7,100.0f,200.0f,255.0f);
+            glPushMatrix();
+                glTranslated(25.0,0.0,0.0);
+                glRotated(x3,0.0,0.0,1.0);
+                cuerda(lar,255.0f,255.0f,0.0f);
+            glPopMatrix();
+        glPopMatrix();
+    glPopMatrix();
+/*
+    time = glutGet(GLUT_ELAPSED_TIME); /// recupera el tiempo ,que paso desde el incio de programa
+    float dt = float(time -timebase)/1000.0;// delta time
+    timebase = time;
+*/
 	glutSwapBuffers();
-}
-//
-//inicializacion de OpenGL
-//
-void init_GL(void) {
-	//Color del fondo de la escena
-	glClearColor(255.0f, 255.0f, 255.0f, 0.0f); //(R, G, B, transparencia) en este caso un fondo negro
-
-	//modo projeccion
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	glFlush();
 }
 
-//en el caso que la ventana cambie de tamaño
-GLvoid window_redraw(GLsizei width, GLsizei height) {
+GLvoid window_reshape(GLsizei width, GLsizei height)
+{
 	glViewport(0, 0, width, height);
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
+	glOrtho(-100.0f, 100.0f, -100.0f, 100.0f, -2.0f, 2.0f);
 
-	glOrtho(-50.0f,  50.0f,-50.0f, 50.0f, -1.0f, 1.0f);
-	// todas la informaciones previas se aplican al la matrice del ModelView
 	glMatrixMode(GL_MODELVIEW);
 }
 
-GLvoid window_key(unsigned char key, int x, int y) {
-	switch (key) {
-	case KEY_ESC:
-		exit(0);
-		break;
 
+
+void init_scene()
+{
+
+}
+
+GLvoid window_key(unsigned char key, int x, int y)
+{
+	switch (key) {
+	case ECHAP:
+		exit(1);
+		break;
+    case KEY_A:{
+        x1-=0.8;
+        x3+=0.8;
+        cout<<"a"<<endl;
+        break;
+    }
+    case KEY_Q:{
+        x1+=0.8;
+        x3-=0.8;
+        cout<<"q"<<endl;
+        break;
+    }
+    case KEY_W:{
+        cout<<"w"<<endl;
+        x2+=0.8;
+        x3-=0.8;
+        break;
+    }
+    case KEY_S:{
+        x2-=0.8;
+        x3+=0.8;
+        cout<<"s"<<endl;
+        break;
+    }
+    case KEY_D:{
+        lar+=1;
+        cout<<"d"<<endl;
+        break;
+        }
+    case KEY_E:{
+        lar-=0.5;
+        cout<<"e"<<endl;
+        break;
+        }
 	default:
 		break;
 	}
-
 }
-//
-//el programa principal
-//
-int main(int argc, char** argv) {
 
-	//Inicializacion de la GLUT
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-	glutInitWindowSize(600, 600); //tamaño de la ventana
-	glutInitWindowPosition(100, 100); //posicion de la ventana
-	glutCreateWindow("TP1 OpenGL : hello_world_OpenGL"); //titulo de la ventana
 
-	init_GL(); //funcion de inicializacion de OpenGL
-
-	glutDisplayFunc(glPaint);
-	glutReshapeFunc(&window_redraw);
-	// Callback del teclado
-	glutKeyboardFunc(&window_key);
-
-	glutMainLoop(); //bucle de rendering
-
-	return 0;
+//function called on each frame
+GLvoid window_idle()
+{
+	glutPostRedisplay();
 }
