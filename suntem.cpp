@@ -85,6 +85,7 @@ float variant=0.03;
 
 int time=0;
 int timebase=0;
+float tx=0.0,ty=0.0,tz=0.0;
 GLvoid window_display()
 {
 
@@ -93,9 +94,12 @@ GLvoid window_display()
     glEnable(GL_COLOR_MATERIAL);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-25.0f, 25.0f, -25.0f, 25.0f, -25.0f, 25.0f);
-
-//    glTranslatef(x,0.0,0.0);
+	//glOrtho(-25.0f, 25.0f, -25.0f, 25.0f, -25.0f, 25.0f);
+    gluPerspective(45.0,1.0,1.0,100.0);
+    gluLookAt(0.0f,0.0f,30,
+              15.0f,0.0f,0.0f,
+              0.0,1.0,0.0);
+//    glTranslatef(0.0,0.0,-30.0);
     glPushMatrix();
         glColor3f(1.0f,1.0f,0.0f);
         glRotated(b,0.0,1.0,0.0);
@@ -127,14 +131,12 @@ GLvoid window_display()
         glTranslatef(0.0,7.0,0.0);
         glutSolidCube(2.0f);
     glPopMatrix();
-
     glRotatef(a,0.0,0.0,1.0);
     glTranslatef(13.0,0.0,0.0);
     glutSolidTeapot(4.0);
     glPushMatrix();
         glRotatef(a,0.0,1.0,0.0);
         glTranslatef(5.0,5.0,0.0);
-
         glutSolidTorus(0.5f,0.8f,100,100);
     glPopMatrix();*/
     //a+=0.5;
@@ -190,3 +192,4 @@ GLvoid window_idle()
 {
 	glutPostRedisplay();
 }
+
